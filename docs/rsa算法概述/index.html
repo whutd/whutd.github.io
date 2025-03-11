@@ -14,7 +14,7 @@
 
 <html lang="zh-cn"><head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
     <meta charset="utf-8" />
-    <title>Docs | whutd blog</title>
+    <title> | whutd blog</title>
     <meta name="robots" content="noindex">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="keywords" content="Documentation, Hugo, Hugo Theme, Bootstrap" />
@@ -29,13 +29,177 @@
 <link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
 <link rel="manifest" crossorigin="use-credentials" href="http://localhost:1313/site.webmanifest">
-<meta property="og:title" content="Docs" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="http://localhost:1313/docs/" /><meta property="og:image" content="http://localhost:1313/opengraph/card-base-2_hu_bf8a29b332ae7f72.png"/><meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="http://localhost:1313/opengraph/card-base-2_hu_bf8a29b332ae7f72.png"/>
-<meta name="twitter:title" content="Docs"/>
-<meta name="twitter:description" content=""/>
+<meta property="og:title" content="" />
+<meta property="og:description" content="RSA算法讲解 link
+一、生成密钥的基本步骤
+$\textcircled {1}$ 寻找两个质数p q
+$\textcircled {2}$ 两个质数相乘计算N
+N = p * q
+$\textcircled {3}$ 使用欧拉函数计算T
+T = (p - 1)*(q - 1)
+$\textcircled {4}$ 选择合适的公钥E (注意：E应该是一个质数，且不是T的因子)
+$\textcircled {5}$ 计算生成私钥D , 其中D应当满足：（D * E）% T = 1
+经过上述操作，我们将得到公钥对（N, E）与私钥对(N, D),其中我们采用公钥对对明文进行加密，用私钥对进行解密，加密与解密如下：
+$$
+明文^E % N = 密文\
+密文^D % N = 明文\
+$$
+接下来我将具体讲解每个步骤的原理。
+
+二、寻找质数p q
+
+随机数生成
+
+
+    
+    int random_num() {
+    srand(time(NULL));
+    int bai_num = (rand() % (600 - 300 &#43; 1)) &#43; 300;
+    //int p = (rand() % (max_t - min_t &#43; 1)) &#43; min_t;
+    int two_num = (rand() % (99 - 10 &#43; 1)) &#43; 10;
+    int rad_num = bai_num * 100 &#43; two_num;
+    return rad_num;
+}
+这里我们采用C语言的rand()函数，并且以时间为种子生成随机数，注意到这里我生成了两个随机数，原因是：
+为了保证加密的安全性，我们通常选取的两个质数一般会比较大，这里我选择的是五位质数（实际上会更大），而计算机以时间种子在生成较大随机数时，很难保证生成的随机数的均匀分布（即每次生成的大随机数很接近），因此我将五位数的前三位和后两位分开随机生成，可以确保生成的随机数在所给区间里的均匀分配
+判断生成的随机数是不是质数
+这里我们采用Miller Rabin素性检验,主要原理是利用了质数必然满足费马小定理，也即质数一定满足费马小定理，但是满足费马小定理的可能是伪素数，但我们可以通过多次检验来降低出错概率
+参考文献： Miller Rabin素性检验
+代码如下：
+
+
+    
+    int miller_rabin_test(unsigned long long n, int k) {
+ // 处理小数和偶数的情况
+ if (n &lt;= 1 || (n &gt; 2 &amp;&amp; n % 2 == 0)) return 0;
+ if (n &lt;= 3) return 1;
+
+ // 将 n - 1 表示为 d * 2^r
+ unsigned long long d = n - 1;
+ int r = 0;
+ while ((d &amp; 1) == 0) {
+ 	d &gt;&gt;= 1;
+ 	r&#43;&#43;;
+ }
+
+ // 执行 k 次测试
+ for (int i = 0; i &lt; k; i&#43;&#43;) {
+ 	unsigned long long a = 2 &#43; rand() % (n - 4);
+ 	unsigned long long x = mod_pow(a, d, n);
+ 	if (x == 1 || x == n - 1) continue;
+
+ 	int j;
+ 	for (j = 0; j &lt; r - 1; j&#43;&#43;) {
+ 		x = mod_pow(x, 2, n);
+ 		if (x == n - 1) break;
+ 	}
+ 	if (j == r - 1) return 0;
+ }
+     return 1;
+ }
+
+ unsigned long long mod_pow(unsigned long long base, unsigned long long exp, unsigned long long mod) {
+ unsigned long long result = 1;
+ base = base % mod;
+ while (exp &gt; 0) {
+ 	if (exp % 2 == 1)
+ 		result = (result * base) % mod;
+ 	exp = exp &gt;&gt; 1;
+ 	base = (base * base) % mod;
+ }
+ return result;
+ }
+
+
+通过以上办法我们成功找到了两个合适的质数p q" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://localhost:1313/docs/rsa%E7%AE%97%E6%B3%95%E6%A6%82%E8%BF%B0/" /><meta property="og:image" content="http://localhost:1313/opengraph/card-base-2_hu_deda37d96f116041.png"/><meta property="article:section" content="docs" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://localhost:1313/opengraph/card-base-2_hu_deda37d96f116041.png"/>
+<meta name="twitter:title" content=""/>
+<meta name="twitter:description" content="RSA算法讲解 link
+一、生成密钥的基本步骤
+$\textcircled {1}$ 寻找两个质数p q
+$\textcircled {2}$ 两个质数相乘计算N
+N = p * q
+$\textcircled {3}$ 使用欧拉函数计算T
+T = (p - 1)*(q - 1)
+$\textcircled {4}$ 选择合适的公钥E (注意：E应该是一个质数，且不是T的因子)
+$\textcircled {5}$ 计算生成私钥D , 其中D应当满足：（D * E）% T = 1
+经过上述操作，我们将得到公钥对（N, E）与私钥对(N, D),其中我们采用公钥对对明文进行加密，用私钥对进行解密，加密与解密如下：
+$$
+明文^E % N = 密文\
+密文^D % N = 明文\
+$$
+接下来我将具体讲解每个步骤的原理。
+
+二、寻找质数p q
+
+随机数生成
+
+
+    
+    int random_num() {
+    srand(time(NULL));
+    int bai_num = (rand() % (600 - 300 &#43; 1)) &#43; 300;
+    //int p = (rand() % (max_t - min_t &#43; 1)) &#43; min_t;
+    int two_num = (rand() % (99 - 10 &#43; 1)) &#43; 10;
+    int rad_num = bai_num * 100 &#43; two_num;
+    return rad_num;
+}
+这里我们采用C语言的rand()函数，并且以时间为种子生成随机数，注意到这里我生成了两个随机数，原因是：
+为了保证加密的安全性，我们通常选取的两个质数一般会比较大，这里我选择的是五位质数（实际上会更大），而计算机以时间种子在生成较大随机数时，很难保证生成的随机数的均匀分布（即每次生成的大随机数很接近），因此我将五位数的前三位和后两位分开随机生成，可以确保生成的随机数在所给区间里的均匀分配
+判断生成的随机数是不是质数
+这里我们采用Miller Rabin素性检验,主要原理是利用了质数必然满足费马小定理，也即质数一定满足费马小定理，但是满足费马小定理的可能是伪素数，但我们可以通过多次检验来降低出错概率
+参考文献： Miller Rabin素性检验
+代码如下：
+
+
+    
+    int miller_rabin_test(unsigned long long n, int k) {
+ // 处理小数和偶数的情况
+ if (n &lt;= 1 || (n &gt; 2 &amp;&amp; n % 2 == 0)) return 0;
+ if (n &lt;= 3) return 1;
+
+ // 将 n - 1 表示为 d * 2^r
+ unsigned long long d = n - 1;
+ int r = 0;
+ while ((d &amp; 1) == 0) {
+ 	d &gt;&gt;= 1;
+ 	r&#43;&#43;;
+ }
+
+ // 执行 k 次测试
+ for (int i = 0; i &lt; k; i&#43;&#43;) {
+ 	unsigned long long a = 2 &#43; rand() % (n - 4);
+ 	unsigned long long x = mod_pow(a, d, n);
+ 	if (x == 1 || x == n - 1) continue;
+
+ 	int j;
+ 	for (j = 0; j &lt; r - 1; j&#43;&#43;) {
+ 		x = mod_pow(x, 2, n);
+ 		if (x == n - 1) break;
+ 	}
+ 	if (j == r - 1) return 0;
+ }
+     return 1;
+ }
+
+ unsigned long long mod_pow(unsigned long long base, unsigned long long exp, unsigned long long mod) {
+ unsigned long long result = 1;
+ base = base % mod;
+ while (exp &gt; 0) {
+ 	if (exp % 2 == 1)
+ 		result = (result * base) % mod;
+ 	exp = exp &gt;&gt; 1;
+ 	base = (base * base) % mod;
+ }
+ return result;
+ }
+
+
+通过以上办法我们成功找到了两个合适的质数p q"/>
 
     
         <link rel="alternate" type="application/atom+xml" title="Atom feed for whutd blog" href="/index.xml" />
@@ -121,7 +285,7 @@
                 
                     
                         
-                        <li class="">
+                        <li class="current">
                             <a class="sidebar-root-link" href="http://localhost:1313/docs/rsa%E7%AE%97%E6%B3%95%E6%A6%82%E8%BF%B0/">
                                 
                                 
@@ -239,10 +403,18 @@
                                         <div class="d-md-flex justify-content-between align-items-center"><nav aria-label="breadcrumb" class="d-inline-block pb-2 mt-1 mt-sm-0">
     <ul id="breadcrumbs" class="breadcrumb bg-transparent mb-0" itemscope itemtype="https://schema.org/BreadcrumbList">
         
+            
+                <li class="breadcrumb-item text-capitalize active" aria-current="page" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                    <a itemprop="item" href="/docs/">
+                        <i class="material-icons size-20 align-text-bottom" itemprop="name">Home</i>
+                    </a>
+                    <meta itemprop="position" content='1' />
+                </li>
+            
         
-            <li class="breadcrumb-item text-capitalize active" aria-current="page" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <i class="material-icons size-20 align-text-bottom" itemprop="name">Home</i>
-                <meta itemprop="position" content='1' />
+            <li class="breadcrumb-item text-capitalize active" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <span itemprop="name"></span>
+                <meta itemprop="position" content='2' />
             </li>
         
     </ul>
@@ -250,154 +422,253 @@
                                     
                                     <div class="row flex-xl-nowrap">
                                         
-                                        <div class="docs-toc col-xl-3 visually-hidden visually-hidden  d-xl-block"><toc>
+                                        <div class="docs-toc col-xl-3    d-xl-block"><toc>
     <div class="fw-bold text-uppercase mb-2">On this page</div>
-    <nav id="TableOfContents"></nav>
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#rsa算法讲解">RSA算法讲解</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
     </toc></div>
                                         
                                         
-                                        <div class="docs-toc-mobile visually-hidden visually-hidden  d-print-none d-xl-none">
+                                        <div class="docs-toc-mobile    d-print-none d-xl-none">
                                             <button id="toc-dropdown-btn" class="btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-offset="0,0" aria-expanded="false">
                                                 Table of Contents
                                             </button>
-<nav id="toc-mobile"></nav></div>
-                                        <div class="docs-content col-12  mt-0">
+<nav id="toc-mobile">
+  <ul class="dropdown-menu">
+    <li>
+      <ul>
+        <li><a href="#rsa算法讲解">RSA算法讲解</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                                        <div class="docs-content col-12 col-xl-9 mt-0">
                                             <div class="mb-0 d-flex">
                                                 
                                                 <h1 class="content-title mb-0">
-                                                    Docs
+                                                    
                                                     
                                                 </h1>
                                             </div>
                                             
                                             <div id="content" class="main-content" >
                                                 
-    <div class="row flex-xl-wrap">
-        
-        <div id="list-item" class="col-md-4 col-12 mt-4 pt-2">
-            <a class="text-decoration-none text-reset" href="http://localhost:1313/docs/%E5%AD%97%E7%AC%A6%E4%B8%B2kmp%E7%AE%97%E6%B3%95/">
-                <div class="card h-100 features feature-full-bg rounded p-4 position-relative overflow-hidden border-1">
-                    <span class="icon-color d-flex my-3">
-                        <i class="material-icons align-middle">article</i>
-                        
-                        
-                    </span>
-                    <div class="card-body p-0 content">
-                        <p class="fs-5 fw-semibold card-title mb-1">【字符串】KMP算法</p>
-                        <p class="para card-text mb-0"></p>
-                    </div>
-                    
-                </div>
-            </a>
-        </div>
-        
-        <div id="list-item" class="col-md-4 col-12 mt-4 pt-2">
-            <a class="text-decoration-none text-reset" href="http://localhost:1313/docs/example-page/">
-                <div class="card h-100 features feature-full-bg rounded p-4 position-relative overflow-hidden border-1">
-                    <span class="icon-color d-flex my-3">
-                        <i class="material-icons align-middle">article</i>
-                        
-                        
-                    </span>
-                    <div class="card-body p-0 content">
-                        <p class="fs-5 fw-semibold card-title mb-1">Example Page</p>
-                        <p class="para card-text mb-0"></p>
-                    </div>
-                    
-                </div>
-            </a>
-        </div>
-        
-        <div id="list-item" class="col-md-4 col-12 mt-4 pt-2">
-            <a class="text-decoration-none text-reset" href="http://localhost:1313/docs/bigintcalc/">
-                <div class="card h-100 features feature-full-bg rounded p-4 position-relative overflow-hidden border-1">
-                    <span class="icon-color d-flex my-3">
-                        <i class="material-icons align-middle">article</i>
-                        
-                        
-                    </span>
-                    <div class="card-body p-0 content">
-                        <p class="fs-5 fw-semibold card-title mb-1">BigIntcalc</p>
-                        <p class="para card-text mb-0">朴素大整数算法的基本思想是模拟手算乘法，时间复杂度为O(n^2),而Karatsuba算法和FFT可以优化这一点</p>
-                    </div>
-                    
-                </div>
-            </a>
-        </div>
-        
-        <div id="list-item" class="col-md-4 col-12 mt-4 pt-2">
-            <a class="text-decoration-none text-reset" href="http://localhost:1313/docs/arp%E6%94%BB%E5%87%BB/">
-                <div class="card h-100 features feature-full-bg rounded p-4 position-relative overflow-hidden border-1">
-                    <span class="icon-color d-flex my-3">
-                        <i class="material-icons align-middle">article</i>
-                        
-                        
-                    </span>
-                    <div class="card-body p-0 content">
-                        <p class="fs-5 fw-semibold card-title mb-1"></p>
-                        <p class="para card-text mb-0"></p>
-                    </div>
-                    
-                </div>
-            </a>
-        </div>
-        
-        <div id="list-item" class="col-md-4 col-12 mt-4 pt-2">
-            <a class="text-decoration-none text-reset" href="http://localhost:1313/docs/godan/">
-                <div class="card h-100 features feature-full-bg rounded p-4 position-relative overflow-hidden border-1">
-                    <span class="icon-color d-flex my-3">
-                        <i class="material-icons align-middle">article</i>
-                        
-                        
-                    </span>
-                    <div class="card-body p-0 content">
-                        <p class="fs-5 fw-semibold card-title mb-1"></p>
-                        <p class="para card-text mb-0"></p>
-                    </div>
-                    
-                </div>
-            </a>
-        </div>
-        
-        <div id="list-item" class="col-md-4 col-12 mt-4 pt-2">
-            <a class="text-decoration-none text-reset" href="http://localhost:1313/docs/rsa%E7%AE%97%E6%B3%95%E6%A6%82%E8%BF%B0/">
-                <div class="card h-100 features feature-full-bg rounded p-4 position-relative overflow-hidden border-1">
-                    <span class="icon-color d-flex my-3">
-                        <i class="material-icons align-middle">article</i>
-                        
-                        
-                    </span>
-                    <div class="card-body p-0 content">
-                        <p class="fs-5 fw-semibold card-title mb-1"></p>
-                        <p class="para card-text mb-0"></p>
-                    </div>
-                    
-                </div>
-            </a>
-        </div>
-        
-        <div id="list-item" class="col-md-4 col-12 mt-4 pt-2">
-            <a class="text-decoration-none text-reset" href="http://localhost:1313/docs/whutd%E6%8E%A8%E6%96%870x00-----%E6%BC%AB%E8%B0%88sql/">
-                <div class="card h-100 features feature-full-bg rounded p-4 position-relative overflow-hidden border-1">
-                    <span class="icon-color d-flex my-3">
-                        <i class="material-icons align-middle">article</i>
-                        
-                        
-                    </span>
-                    <div class="card-body p-0 content">
-                        <p class="fs-5 fw-semibold card-title mb-1"></p>
-                        <p class="para card-text mb-0"></p>
-                    </div>
-                    
-                </div>
-            </a>
-        </div>
-        
+    
+    <div data-prismjs-copy="" data-prismjs-copy-success="" data-prismjs-copy-error="">
+        <h3 id="rsa算法讲解">RSA算法讲解 <a href="#rsa%e7%ae%97%e6%b3%95%e8%ae%b2%e8%a7%a3" class="anchor" aria-hidden="true"><i class="material-icons align-middle">link</i></a></h3><hr>
+<p><strong>一、生成密钥的基本步骤</strong>
+$\textcircled {1}$ 寻找两个质数<code>p</code> <code>q</code>
+$\textcircled {2}$ 两个质数相乘计算<code>N</code>
+<code>N = p * q</code>
+$\textcircled {3}$ 使用欧拉函数计算<code>T</code>
+<code>T = (p - 1)*(q - 1)</code>
+$\textcircled {4}$ 选择合适的公钥<code>E</code> <strong>(注意：<code>E</code>应该是一个质数，且不是<code>T</code>的因子)</strong>
+$\textcircled {5}$ 计算生成私钥<code>D</code> , 其中<code>D</code>应当满足：<code>（D * E）% T = 1</code></p>
+<p>经过上述操作，我们将得到<strong>公钥对</strong><code>（N, E）</code>与<strong>私钥对</strong><code>(N, D)</code>,其中我们采用公钥对对明文进行加密，用私钥对进行解密，加密与解密如下：
+$$
+明文^E % N = 密文\
+密文^D % N = 明文\
+$$
+接下来我将具体讲解每个步骤的原理。</p>
+<hr>
+<p><strong>二、寻找质数<code>p</code> <code>q</code></strong></p>
+<ol>
+<li>随机数生成
+
+
+    
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">random_num</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">srand</span>(<span style="color:#a6e22e">time</span>(NULL));
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> bai_num <span style="color:#f92672">=</span> (<span style="color:#a6e22e">rand</span>() <span style="color:#f92672">%</span> (<span style="color:#ae81ff">600</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">300</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>)) <span style="color:#f92672">+</span> <span style="color:#ae81ff">300</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//int p = (rand() % (max_t - min_t + 1)) + min_t;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int</span> two_num <span style="color:#f92672">=</span> (<span style="color:#a6e22e">rand</span>() <span style="color:#f92672">%</span> (<span style="color:#ae81ff">99</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">10</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>)) <span style="color:#f92672">+</span> <span style="color:#ae81ff">10</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> rad_num <span style="color:#f92672">=</span> bai_num <span style="color:#f92672">*</span> <span style="color:#ae81ff">100</span> <span style="color:#f92672">+</span> two_num;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> rad_num;
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
+这里我们采用C语言的<code>rand()</code>函数，并且以<strong>时间为种子</strong>生成随机数，注意到这里我<strong>生成了两个随机数</strong>，原因是：
+为了保证加密的安全性，我们通常选取的两个质数一般会比较大，这里我选择的是五位质数（实际上会更大），而计算机以时间种子在生成较大随机数时，<strong>很难保证生成的随机数的均匀分布</strong>（<strong>即每次生成的大随机数很接近</strong>），因此我将五位数的前三位和后两位<strong>分开随机生成</strong>，可以确保生成的随机数在所给区间里的均匀分配</li>
+<li>判断生成的随机数是不是质数
+这里我们采用<code>Miller Rabin素性检验</code>,主要原理是利用了质数必然满足费马小定理，也即<strong>质数一定满足费马小定理，但是满足费马小定理的可能是伪素数</strong>，但我们可以通过<strong>多次检验</strong>来降低出错概率
+参考文献： <a href="https://zhuanlan.zhihu.com/p/349360074" rel="external" target="_blank">Miller Rabin素性检验<svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M14 5c-.552 0-1-.448-1-1s.448-1 1-1h6c.552 0 1 .448 1 1v6c0 .552-.448 1-1 1s-1-.448-1-1v-3.586l-7.293 7.293c-.391.39-1.024.39-1.414 0-.391-.391-.391-1.024 0-1.414l7.293-7.293h-3.586zm-9 2c-.552 0-1 .448-1 1v11c0 .552.448 1 1 1h11c.552 0 1-.448 1-1v-4.563c0-.552.448-1 1-1s1 .448 1 1v4.563c0 1.657-1.343 3-3 3h-11c-1.657 0-3-1.343-3-3v-11c0-1.657 1.343-3 3-3h4.563c.552 0 1 .448 1 1s-.448 1-1 1h-4.563z"/></svg></a>
+代码如下：
+
+
+    
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">miller_rabin_test</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> n, <span style="color:#66d9ef">int</span> k) {
+</span></span><span style="display:flex;"><span> <span style="color:#75715e">// 处理小数和偶数的情况
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span> <span style="color:#66d9ef">if</span> (n <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">||</span> (n <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">&amp;&amp;</span> n <span style="color:#f92672">%</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>)) <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span> <span style="color:#66d9ef">if</span> (n <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">3</span>) <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> <span style="color:#75715e">// 将 n - 1 表示为 d * 2^r
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span> <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> d <span style="color:#f92672">=</span> n <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span> <span style="color:#66d9ef">int</span> r <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span> <span style="color:#66d9ef">while</span> ((d <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span> 	d <span style="color:#f92672">&gt;&gt;=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span> 	r<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span> }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> <span style="color:#75715e">// 执行 k 次测试
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span> <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> k; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span> 	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> a <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">rand</span>() <span style="color:#f92672">%</span> (n <span style="color:#f92672">-</span> <span style="color:#ae81ff">4</span>);
+</span></span><span style="display:flex;"><span> 	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> x <span style="color:#f92672">=</span> <span style="color:#a6e22e">mod_pow</span>(a, d, n);
+</span></span><span style="display:flex;"><span> 	<span style="color:#66d9ef">if</span> (x <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">||</span> x <span style="color:#f92672">==</span> n <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> 	<span style="color:#66d9ef">int</span> j;
+</span></span><span style="display:flex;"><span> 	<span style="color:#66d9ef">for</span> (j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> r <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span> 		x <span style="color:#f92672">=</span> <span style="color:#a6e22e">mod_pow</span>(x, <span style="color:#ae81ff">2</span>, n);
+</span></span><span style="display:flex;"><span> 		<span style="color:#66d9ef">if</span> (x <span style="color:#f92672">==</span> n <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span> 	}
+</span></span><span style="display:flex;"><span> 	<span style="color:#66d9ef">if</span> (j <span style="color:#f92672">==</span> r <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span> }
+</span></span><span style="display:flex;"><span>     <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span> }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">mod_pow</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> base, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> exp, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> mod) {
+</span></span><span style="display:flex;"><span> <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> result <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span> base <span style="color:#f92672">=</span> base <span style="color:#f92672">%</span> mod;
+</span></span><span style="display:flex;"><span> <span style="color:#66d9ef">while</span> (exp <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span> 	<span style="color:#66d9ef">if</span> (exp <span style="color:#f92672">%</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span> 		result <span style="color:#f92672">=</span> (result <span style="color:#f92672">*</span> base) <span style="color:#f92672">%</span> mod;
+</span></span><span style="display:flex;"><span> 	exp <span style="color:#f92672">=</span> exp <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span> 	base <span style="color:#f92672">=</span> (base <span style="color:#f92672">*</span> base) <span style="color:#f92672">%</span> mod;
+</span></span><span style="display:flex;"><span> }
+</span></span><span style="display:flex;"><span> <span style="color:#66d9ef">return</span> result;
+</span></span><span style="display:flex;"><span> }</span></span></code></pre></div>
+</li>
+</ol>
+<p><strong>通过以上办法我们成功找到了两个合适的质数<code>p</code> <code>q</code></strong></p>
+<hr>
+<p><strong>三、计算N以及T的值</strong>
+这里我着重讲解以下<strong>欧拉函数</strong>
+==定义==：
+对于一个正整数n， n的欧拉函数$\phi(n)$表示小于等于n的与n互质的正整数个数。
+==性质1==：
+如果n为质数，那么$\phi(n) = n - 1$
+==性质2==：
+如果p，q都为质数，那么$\phi(p \cdot q) = \phi(p) \times \phi(q) = (p - 1) \times (q - 1)$
+==性质3==：
+若p为质数，则$\phi(p^k) = p^k - p^{k-1}$</p>
+<hr>
+<p><strong>四、选择公钥E</strong>
+这里的公钥E一般是人为自己选择的，<strong>只需要确保E与T==互质==即可，一般不要太大</strong></p>
+<hr>
+<p><strong>五、计算私钥</strong>
+==引理1==：
+辗转相除法（欧几里得算法）：
+$$
+gcd(a,b) = gcd(b, a%b) = \cdots
+$$
+其中gcd中第一个参数大于第二个参数
+现在我们回到所要解决的问题：
+计算生成私钥<code>D</code> , 其中<code>D</code>应当满足：<code>（D * E）% T = 1</code>，其中E和T我们已经在前面得到
+将<code>（D * E）% T = 1</code>变形，有：
+<code>E(已知)* D = k（未知）T + 1</code>
+对于这个问题，我们可以知道的是，对于不同的k，可能会有不同的D与之对应，但我们只需要找到一个最接近0的即可</p>
+<p>==引理2==：
+拓展欧几里得算法如下
+例子：给定正整数$a$, $b$（<strong>互质且默认a&gt;b</strong>）, 求满足$ax+by = 1$的解$x$和$y$(这里会发现和我们上述式子形式基本一致)
+那么我们会有：
+$$
+ax+by=1 = gcd(a, b) = gcd(b, a mod b) = bx&rsquo;+ (amodb)y&rsquo; =bx&rsquo; + (a-b\lfloor\frac{a}{b}\rfloor)y&rsquo;\
+整理一下，得到\
+ax+by = 1 和ay&rsquo; + b(x&rsquo; - \lfloor\frac{a}{b}\rfloor y&rsquo;) = 1
+$$
+所以我们认为，
+$$
+x = y&rsquo;, y = x&rsquo; - \lfloor\frac{a}{b}\rfloor y&rsquo;
+$$
+这里我们和欧几里得算法一样不断进行下去，最终会得到比较简单的结果，在根据递推关系求解出原问题。</p>
+<p>代码如下：</p>
+
+
+    
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">calculate</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> max, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> min) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> (min <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {  <span style="color:#75715e">// (1, 0) -&gt; (result[0] 系数大值)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>		result[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>		result[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>		count<span style="color:#f92672">--</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> temp1 <span style="color:#f92672">=</span> result[<span style="color:#ae81ff">0</span>];
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> temp2 <span style="color:#f92672">=</span> result[<span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>		result[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> temp2;
+</span></span><span style="display:flex;"><span>		result[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> temp1 <span style="color:#f92672">-</span> (max <span style="color:#f92672">/</span> min) <span style="color:#f92672">*</span> temp2;
+</span></span><span style="display:flex;"><span>		count<span style="color:#f92672">--</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">//printf(&#34;*(%d, %d)*&#34;, result[0], result[1]);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">if</span> (count <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	max <span style="color:#f92672">=</span> arr[count <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>][<span style="color:#ae81ff">0</span>];
+</span></span><span style="display:flex;"><span>	min <span style="color:#f92672">=</span> arr[count <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>][<span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">calculate</span>(max, min);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
+<p>我们采用递归的方法计算，把每次计算结果存储在arr中。</p>
+<hr>
+<p><strong>六、对信息的加密和解密</strong>
+这里我主要介绍一个快速算模幂的算法：</p>
+
+
+    
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">modular_exponentiation</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> base, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> exponent, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> modulus) {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> result <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>	base <span style="color:#f92672">=</span> base <span style="color:#f92672">%</span> modulus;  <span style="color:#75715e">// 更新底数为小于模数的值
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">while</span> (exponent <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>		<span style="color:#75715e">// 如果指数是奇数，乘上底数
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>		<span style="color:#66d9ef">if</span> (exponent <span style="color:#f92672">%</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>			result <span style="color:#f92672">=</span> (result <span style="color:#f92672">*</span> base) <span style="color:#f92672">%</span> modulus;
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#75715e">// 平方底数
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>		base <span style="color:#f92672">=</span> (base <span style="color:#f92672">*</span> base) <span style="color:#f92672">%</span> modulus;
+</span></span><span style="display:flex;"><span>		<span style="color:#75715e">// 整除指数
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>		exponent <span style="color:#f92672">=</span> exponent <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> result;
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
+<p>用于解决明文和密文之间的转换</p>
+
     </div>
 
+    
+
+    
                                             </div>
                                             <div><hr class="doc-hr">
 <div id="doc-nav" class="d-print-none">
+
+	<div class="row flex-xl-nowrap ">
+	<div class="col-sm-6 pt-2 doc-next">
+		<a href="/docs/godan/">
+			<div class="card h-100 my-1">
+				<div class="card-body py-2">
+                    <p class="card-title fs-5 fw-semibold lh-base mb-0"><i class="material-icons align-middle">navigate_before</i> </p>
+					
+				</div>
+			</div>
+		</a>
+        </div>
+	<div class="col-sm-6 pt-2 doc-prev">
+		<a class="ms-auto" href="/docs/whutd%E6%8E%A8%E6%96%870x00-----%E6%BC%AB%E8%B0%88sql/">
+			<div class="card h-100 my-1 text-end">
+				<div class="card-body py-2">
+                    <p class="card-title fs-5 fw-semibold lh-base mb-0"> <i class="material-icons align-middle">navigate_next</i></p>
+					
+				</div>
+			</div>
+		</a>
+        </div>
+	</div>
 </div></div>
                                         </div>
                                     </div>

@@ -14,9 +14,10 @@
 
 <html lang="zh-cn"><head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
     <meta charset="utf-8" />
-    <title>Docs | whutd blog</title>
+    <title>BigIntcalc | whutd blog</title>
     <meta name="robots" content="noindex">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="朴素大整数算法的基本思想是模拟手算乘法，时间复杂度为O(n^2),而Karatsuba算法和FFT可以优化这一点">
     <meta name="keywords" content="Documentation, Hugo, Hugo Theme, Bootstrap" />
     <meta name="author" content="Colin Wilson - Lotus Labs" />
     <meta name="email" content="support@aigis.uk" />
@@ -29,13 +30,15 @@
 <link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
 <link rel="manifest" crossorigin="use-credentials" href="http://localhost:1313/site.webmanifest">
-<meta property="og:title" content="Docs" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="http://localhost:1313/docs/" /><meta property="og:image" content="http://localhost:1313/opengraph/card-base-2_hu_bf8a29b332ae7f72.png"/><meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="http://localhost:1313/opengraph/card-base-2_hu_bf8a29b332ae7f72.png"/>
-<meta name="twitter:title" content="Docs"/>
-<meta name="twitter:description" content=""/>
+<meta property="og:title" content="BigIntcalc" />
+<meta property="og:description" content="朴素大整数算法的基本思想是模拟手算乘法，时间复杂度为O(n^2),而Karatsuba算法和FFT可以优化这一点" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://localhost:1313/docs/bigintcalc/" /><meta property="og:image" content="http://localhost:1313/opengraph/card-base-2_hu_1a988a96252fa30c.png"/><meta property="article:section" content="docs" />
+<meta property="article:published_time" content="2024-12-12T00:35:34+00:00" />
+<meta property="article:modified_time" content="2024-12-12T00:35:34+00:00" /><meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://localhost:1313/opengraph/card-base-2_hu_1a988a96252fa30c.png"/>
+<meta name="twitter:title" content="BigIntcalc"/>
+<meta name="twitter:description" content="朴素大整数算法的基本思想是模拟手算乘法，时间复杂度为O(n^2),而Karatsuba算法和FFT可以优化这一点"/>
 
     
         <link rel="alternate" type="application/atom+xml" title="Atom feed for whutd blog" href="/index.xml" />
@@ -50,8 +53,27 @@
     
 
     <link rel="stylesheet" href="/docs/scss/style.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="/docs/scss/katex.css" crossorigin="anonymous">
     
+    <script src="/docs/js/katex.js" defer></script>
+    <script src="/docs/js/auto-render.js" defer></script>
     
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.getElementById("content"), {
+          
+          
+          delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: false},
+              {left: '\\[', right: '\\]', display: true}
+          ],
+          
+          throwOnError : false
+        });
+    });
+</script>
     </head>
 <body>
         <div class="content">
@@ -91,7 +113,7 @@
                 
                     
                         
-                        <li class="">
+                        <li class="current">
                             <a class="sidebar-root-link" href="http://localhost:1313/docs/bigintcalc/">
                                 
                                 BigIntcalc
@@ -239,10 +261,18 @@
                                         <div class="d-md-flex justify-content-between align-items-center"><nav aria-label="breadcrumb" class="d-inline-block pb-2 mt-1 mt-sm-0">
     <ul id="breadcrumbs" class="breadcrumb bg-transparent mb-0" itemscope itemtype="https://schema.org/BreadcrumbList">
         
+            
+                <li class="breadcrumb-item text-capitalize active" aria-current="page" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                    <a itemprop="item" href="/docs/">
+                        <i class="material-icons size-20 align-text-bottom" itemprop="name">Home</i>
+                    </a>
+                    <meta itemprop="position" content='1' />
+                </li>
+            
         
-            <li class="breadcrumb-item text-capitalize active" aria-current="page" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <i class="material-icons size-20 align-text-bottom" itemprop="name">Home</i>
-                <meta itemprop="position" content='1' />
+            <li class="breadcrumb-item text-capitalize active" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <span itemprop="name">BigIntcalc</span>
+                <meta itemprop="position" content='2' />
             </li>
         
     </ul>
@@ -250,154 +280,478 @@
                                     
                                     <div class="row flex-xl-nowrap">
                                         
-                                        <div class="docs-toc col-xl-3 visually-hidden visually-hidden  d-xl-block"><toc>
+                                        <div class="docs-toc col-xl-3    d-xl-block"><toc>
     <div class="fw-bold text-uppercase mb-2">On this page</div>
-    <nav id="TableOfContents"></nav>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#空间优化">空间优化</a>
+      <ul>
+        <li><a href="#压位">压位</a></li>
+      </ul>
+    </li>
+    <li><a href="#时间优化">时间优化</a>
+      <ul>
+        <li><a href="#karatsuba算法优化">Karatsuba算法优化</a></li>
+        <li><a href="#基于快速傅里叶变换fft的优化">基于快速傅里叶变换FFT的优化</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
     </toc></div>
                                         
                                         
-                                        <div class="docs-toc-mobile visually-hidden visually-hidden  d-print-none d-xl-none">
+                                        <div class="docs-toc-mobile    d-print-none d-xl-none">
                                             <button id="toc-dropdown-btn" class="btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-offset="0,0" aria-expanded="false">
                                                 Table of Contents
                                             </button>
-<nav id="toc-mobile"></nav></div>
-                                        <div class="docs-content col-12  mt-0">
+<nav id="toc-mobile">
+  <ul class="dropdown-menu">
+    <li><a href="#空间优化">空间优化</a>
+      <ul>
+        <li><a href="#压位">压位</a></li>
+      </ul>
+    </li>
+    <li><a href="#时间优化">时间优化</a>
+      <ul>
+        <li><a href="#karatsuba算法优化">Karatsuba算法优化</a></li>
+        <li><a href="#基于快速傅里叶变换fft的优化">基于快速傅里叶变换FFT的优化</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+                                        <div class="docs-content col-12 col-xl-9 mt-0">
                                             <div class="mb-0 d-flex">
                                                 
                                                 <h1 class="content-title mb-0">
-                                                    Docs
+                                                    BigIntcalc
                                                     
                                                 </h1>
                                             </div>
                                             
                                             <div id="content" class="main-content" >
                                                 
-    <div class="row flex-xl-wrap">
-        
-        <div id="list-item" class="col-md-4 col-12 mt-4 pt-2">
-            <a class="text-decoration-none text-reset" href="http://localhost:1313/docs/%E5%AD%97%E7%AC%A6%E4%B8%B2kmp%E7%AE%97%E6%B3%95/">
-                <div class="card h-100 features feature-full-bg rounded p-4 position-relative overflow-hidden border-1">
-                    <span class="icon-color d-flex my-3">
-                        <i class="material-icons align-middle">article</i>
-                        
-                        
-                    </span>
-                    <div class="card-body p-0 content">
-                        <p class="fs-5 fw-semibold card-title mb-1">【字符串】KMP算法</p>
-                        <p class="para card-text mb-0"></p>
-                    </div>
-                    
-                </div>
-            </a>
-        </div>
-        
-        <div id="list-item" class="col-md-4 col-12 mt-4 pt-2">
-            <a class="text-decoration-none text-reset" href="http://localhost:1313/docs/example-page/">
-                <div class="card h-100 features feature-full-bg rounded p-4 position-relative overflow-hidden border-1">
-                    <span class="icon-color d-flex my-3">
-                        <i class="material-icons align-middle">article</i>
-                        
-                        
-                    </span>
-                    <div class="card-body p-0 content">
-                        <p class="fs-5 fw-semibold card-title mb-1">Example Page</p>
-                        <p class="para card-text mb-0"></p>
-                    </div>
-                    
-                </div>
-            </a>
-        </div>
-        
-        <div id="list-item" class="col-md-4 col-12 mt-4 pt-2">
-            <a class="text-decoration-none text-reset" href="http://localhost:1313/docs/bigintcalc/">
-                <div class="card h-100 features feature-full-bg rounded p-4 position-relative overflow-hidden border-1">
-                    <span class="icon-color d-flex my-3">
-                        <i class="material-icons align-middle">article</i>
-                        
-                        
-                    </span>
-                    <div class="card-body p-0 content">
-                        <p class="fs-5 fw-semibold card-title mb-1">BigIntcalc</p>
-                        <p class="para card-text mb-0">朴素大整数算法的基本思想是模拟手算乘法，时间复杂度为O(n^2),而Karatsuba算法和FFT可以优化这一点</p>
-                    </div>
-                    
-                </div>
-            </a>
-        </div>
-        
-        <div id="list-item" class="col-md-4 col-12 mt-4 pt-2">
-            <a class="text-decoration-none text-reset" href="http://localhost:1313/docs/arp%E6%94%BB%E5%87%BB/">
-                <div class="card h-100 features feature-full-bg rounded p-4 position-relative overflow-hidden border-1">
-                    <span class="icon-color d-flex my-3">
-                        <i class="material-icons align-middle">article</i>
-                        
-                        
-                    </span>
-                    <div class="card-body p-0 content">
-                        <p class="fs-5 fw-semibold card-title mb-1"></p>
-                        <p class="para card-text mb-0"></p>
-                    </div>
-                    
-                </div>
-            </a>
-        </div>
-        
-        <div id="list-item" class="col-md-4 col-12 mt-4 pt-2">
-            <a class="text-decoration-none text-reset" href="http://localhost:1313/docs/godan/">
-                <div class="card h-100 features feature-full-bg rounded p-4 position-relative overflow-hidden border-1">
-                    <span class="icon-color d-flex my-3">
-                        <i class="material-icons align-middle">article</i>
-                        
-                        
-                    </span>
-                    <div class="card-body p-0 content">
-                        <p class="fs-5 fw-semibold card-title mb-1"></p>
-                        <p class="para card-text mb-0"></p>
-                    </div>
-                    
-                </div>
-            </a>
-        </div>
-        
-        <div id="list-item" class="col-md-4 col-12 mt-4 pt-2">
-            <a class="text-decoration-none text-reset" href="http://localhost:1313/docs/rsa%E7%AE%97%E6%B3%95%E6%A6%82%E8%BF%B0/">
-                <div class="card h-100 features feature-full-bg rounded p-4 position-relative overflow-hidden border-1">
-                    <span class="icon-color d-flex my-3">
-                        <i class="material-icons align-middle">article</i>
-                        
-                        
-                    </span>
-                    <div class="card-body p-0 content">
-                        <p class="fs-5 fw-semibold card-title mb-1"></p>
-                        <p class="para card-text mb-0"></p>
-                    </div>
-                    
-                </div>
-            </a>
-        </div>
-        
-        <div id="list-item" class="col-md-4 col-12 mt-4 pt-2">
-            <a class="text-decoration-none text-reset" href="http://localhost:1313/docs/whutd%E6%8E%A8%E6%96%870x00-----%E6%BC%AB%E8%B0%88sql/">
-                <div class="card h-100 features feature-full-bg rounded p-4 position-relative overflow-hidden border-1">
-                    <span class="icon-color d-flex my-3">
-                        <i class="material-icons align-middle">article</i>
-                        
-                        
-                    </span>
-                    <div class="card-body p-0 content">
-                        <p class="fs-5 fw-semibold card-title mb-1"></p>
-                        <p class="para card-text mb-0"></p>
-                    </div>
-                    
-                </div>
-            </a>
-        </div>
-        
+    
+    <div data-prismjs-copy="" data-prismjs-copy-success="" data-prismjs-copy-error="">
+        <h1 id="大数乘法优化的几点方法">大数乘法优化的几点方法 <a href="#%e5%a4%a7%e6%95%b0%e4%b9%98%e6%b3%95%e4%bc%98%e5%8c%96%e7%9a%84%e5%87%a0%e7%82%b9%e6%96%b9%e6%b3%95" class="anchor" aria-hidden="true"><i class="material-icons align-middle">link</i></a></h1><hr>
+<p>悲剧地发现看不懂前面的推文后立志要写出只要是上过课的都能懂的文章。请懂的同学通过目录去了解自己有兴趣的内容，或者快速划过这篇推文。</p>
+<hr>
+<ul>
+<li>
+<h2 id="空间优化">空间优化 <a href="#%e7%a9%ba%e9%97%b4%e4%bc%98%e5%8c%96" class="anchor" aria-hidden="true"><i class="material-icons align-middle">link</i></a></h2></li>
+<li>
+<ul>
+<li>
+<h3 id="压位">压位 <a href="#%e5%8e%8b%e4%bd%8d" class="anchor" aria-hidden="true"><i class="material-icons align-middle">link</i></a></h3></li>
+</ul>
+</li>
+<li>
+<ul>
+<li>在获取大数字符串后需要以转换为整形存储，然而，如果数组里只存了1个数字未免有点浪费，所以我们可以进行压位操作，多存几个数字。以10进制存储的大数乘法运算一般压4位。</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>要注意的是，在例如 77x130=10010 的计算中，积在数组中的存储为[1，10]，输出结果就变成了110.为了避免这种结果，我们需要对输出格式进行一些处理：</li>
+</ul>
+</li>
+</ul>
+
+
+    
+    <pre tabindex="0"><code>int BigNumber_print(int*c,int top)//c为逆序存放乘积的数组，top为最高位下标
+{
+  printf(&#34;%d&#34;,c[top]);//最高位所在不能补零输出
+  for(int i=top-1;i&gt;=0;i--)
+  {
+    printf(&#34;%04d&#34;,c[i]);//将结果右对齐输出，结果补零，效果如：10-&gt;0010
+  }
+  return 0;
+}</code></pre>
+<ul>
+<li>
+<ul>
+<li>事实上，为了全bit存储以及后续部分算法的使用，我们可以将大数以2进制存储，这就需要2个将10进制转化为2进制的输入函数与将2进制转化为10进制的输出函数。这里不多做赘述。</li>
+</ul>
+</li>
+<li>
+<h2 id="时间优化">时间优化 <a href="#%e6%97%b6%e9%97%b4%e4%bc%98%e5%8c%96" class="anchor" aria-hidden="true"><i class="material-icons align-middle">link</i></a></h2></li>
+<li>
+<ul>
+<li>
+<h3 id="karatsuba算法优化">Karatsuba算法优化 <a href="#karatsuba%e7%ae%97%e6%b3%95%e4%bc%98%e5%8c%96" class="anchor" aria-hidden="true"><i class="material-icons align-middle">link</i></a></h3></li>
+</ul>
+</li>
+<li>
+<ul>
+<li>
+<h4 id="先来做道竖式计算吧">先来做道竖式计算吧 <a href="#%e5%85%88%e6%9d%a5%e5%81%9a%e9%81%93%e7%ab%96%e5%bc%8f%e8%ae%a1%e7%ae%97%e5%90%a7" class="anchor" aria-hidden="true"><i class="material-icons align-middle">link</i></a></h4><p>相信大家都做过这样的乘法列式计算题。
+
+
+
+
+
+
+  
+
+
+
+  
+    
+      <img src="/t0125d0d63253012912_5241267844418668949.jpg" alt="竖式乘法计算" width="400" height="267" loading="lazy">
+    
+  
+
+大数乘法的基本方法就是模拟手算乘法，简单，好想，空间复杂度小，时间复杂度为$O(n^2)$。
+这个过程可以理解为：
+($24\times10 + 0\times1) \times (3\times10 + 6\times1 ) = 72\times100 + (144+0)\times10+(0+6)\times1$
+需要计算的乘法有：24x3、24x6、0x3、0x6</p>
+<p>如果把上面的过程抽象为字符形式：
+($a \times x+b$)($c \times x+d$)=$ac · x^2+ (ad+bc) \times x+bd$
+那么为了得出结果，我们需要知道ac、ad、bc、bd这4个乘法运算结果。</p>
+<p><strong>关键的地方到了。</strong></p>
+<p>易知：(a-b)(c-d)=ac+bd-(ad+bc)，若用ac+bd-(a-b)(c-d)来表示(ad+bc)的话，只需要计算3个乘法运算结果：(a-b)(c-d)、ac、bd。</p>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>
+<h4 id="karatsuba算法的具体步骤">Karatsuba算法的具体步骤 <a href="#karatsuba%e7%ae%97%e6%b3%95%e7%9a%84%e5%85%b7%e4%bd%93%e6%ad%a5%e9%aa%a4" class="anchor" aria-hidden="true"><i class="material-icons align-middle">link</i></a></h4>理解了上面的内容后，下面介绍Karatsuba算法的具体步骤：
+<ul>
+<li>假设2个大数x、y的长度分别为p、q;</li>
+<li>取$n=min\lbrace p,q \rbrace$;</li>
+<li>将x、y表示为：$x=a·10^{n/2} + b；y=c·10^{n/2} + d$；</li>
+<li>计算$(a-b)(c-d)、ac、bd$；</li>
+<li>结果为：$ac·10^n+[ac+bd-(a-b)(c-d)]·10^{n/2}+bd$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>
+<h4 id="karatsuba算法的程序实现">Karatsuba算法的程序实现 <a href="#karatsuba%e7%ae%97%e6%b3%95%e7%9a%84%e7%a8%8b%e5%ba%8f%e5%ae%9e%e7%8e%b0" class="anchor" aria-hidden="true"><i class="material-icons align-middle">link</i></a></h4><p>该算法可通过递归实现，需要提前写好大数加减算法。</p>
+<p>下面给出1个c++代码参考，来源CSDN。据编写者所说，由于没有考虑string类型的一些函数耗时，实际的运行效率是更低的。粘贴过来是因为觉得这个思路清晰，便于学习理解。仅作参考。</p>
+</li>
+</ul>
+</li>
+</ul>
+
+
+    
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">// 简单乘法，一个数和个位数相乘求积；
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>string <span style="color:#a6e22e">multiply</span>(<span style="color:#66d9ef">const</span> string<span style="color:#f92672">&amp;</span> num1, <span style="color:#66d9ef">char</span> num2)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> (num2 <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;0&#39;</span> <span style="color:#f92672">||</span> ISZERO(num1))
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;0&#34;</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> len <span style="color:#f92672">=</span> num1.size();
+</span></span><span style="display:flex;"><span>	string product(len, <span style="color:#e6db74">&#39;0&#39;</span>);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> carry <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> len <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>; i <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>; <span style="color:#f92672">--</span>i)
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">int</span> ret <span style="color:#f92672">=</span> CTOI(num1[i]) <span style="color:#f92672">*</span> CTOI(num2) <span style="color:#f92672">+</span> carry;
+</span></span><span style="display:flex;"><span>		product[len<span style="color:#f92672">-</span>i<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> ITOC(ret <span style="color:#f92672">%</span> <span style="color:#ae81ff">10</span>);
+</span></span><span style="display:flex;"><span>		carry <span style="color:#f92672">=</span> ret <span style="color:#f92672">/</span> <span style="color:#ae81ff">10</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> (carry <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>		product.push_back(ITOC(carry));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	reverse(product.begin(), product.end());
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> product;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Karatsuba乘法
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>string <span style="color:#a6e22e">karatsuba</span>(<span style="color:#66d9ef">const</span> string<span style="color:#f92672">&amp;</span> num1, <span style="color:#66d9ef">const</span> string<span style="color:#f92672">&amp;</span> num2)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// 递归的简单情况
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">if</span> (ISZERO(num1) <span style="color:#f92672">||</span> ISZERO(num2))
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;0&#34;</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> (num1.size() <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span> )
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> multiply(num2, num1[<span style="color:#ae81ff">0</span>]);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> (num2.size() <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>	{
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> multiply(num1, num2[<span style="color:#ae81ff">0</span>]);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> len1 <span style="color:#f92672">=</span> num1.size();
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> len2 <span style="color:#f92672">=</span> num2.size();
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> half <span style="color:#f92672">=</span> ((std<span style="color:#f92672">::</span>max)(len1, len2) <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// 步骤一:计算a, b, c, d
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	string a <span style="color:#f92672">=</span> (len1 <span style="color:#f92672">&gt;</span> half) <span style="color:#f92672">?</span> num1.substr(<span style="color:#ae81ff">0</span>, len1 <span style="color:#f92672">-</span> half) <span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;0&#34;</span>;
+</span></span><span style="display:flex;"><span>	string b <span style="color:#f92672">=</span> (len1 <span style="color:#f92672">&gt;</span> half) <span style="color:#f92672">?</span> num1.substr(len1 <span style="color:#f92672">-</span> half, half) <span style="color:#f92672">:</span> num1;
+</span></span><span style="display:flex;"><span>	string c <span style="color:#f92672">=</span> (len2 <span style="color:#f92672">&gt;</span> half) <span style="color:#f92672">?</span> num2.substr(<span style="color:#ae81ff">0</span>, len2 <span style="color:#f92672">-</span> half) <span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;0&#34;</span>;
+</span></span><span style="display:flex;"><span>	string d <span style="color:#f92672">=</span> (len2 <span style="color:#f92672">&gt;</span> half) <span style="color:#f92672">?</span> num2.substr(len2 <span style="color:#f92672">-</span> half, half) <span style="color:#f92672">:</span> num2;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// 步骤二：计算a*c、b*d、(a+b)*(c+d)-a*c-b*d
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	string t0 <span style="color:#f92672">=</span> karatsuba(a,c);
+</span></span><span style="display:flex;"><span>	string t1 <span style="color:#f92672">=</span> karatsuba(b,d);
+</span></span><span style="display:flex;"><span>	string t2 <span style="color:#f92672">=</span> karatsuba(add(a, b), add(c, d));
+</span></span><span style="display:flex;"><span>	string t3 <span style="color:#f92672">=</span> sub(sub(t2, t1), t0);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// 步骤三：计算乘积结果
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	string nOffset(<span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> half, <span style="color:#e6db74">&#39;0&#39;</span>);
+</span></span><span style="display:flex;"><span>	string nHalfOffset(half, <span style="color:#e6db74">&#39;0&#39;</span>);
+</span></span><span style="display:flex;"><span>	string product <span style="color:#f92672">=</span> add(add((t0 <span style="color:#f92672">+</span> nOffset), (t3 <span style="color:#f92672">+</span> nHalfOffset)), t1);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> product;
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
+<ul>
+<li>
+<ul>
+<li>
+<h3 id="基于快速傅里叶变换fft的优化">基于快速傅里叶变换FFT的优化 <a href="#%e5%9f%ba%e4%ba%8e%e5%bf%ab%e9%80%9f%e5%82%85%e9%87%8c%e5%8f%b6%e5%8f%98%e6%8d%a2fft%e7%9a%84%e4%bc%98%e5%8c%96" class="anchor" aria-hidden="true"><i class="material-icons align-middle">link</i></a></h3></li>
+</ul>
+</li>
+<li>
+<ul>
+<li>
+<h4 id="来做一道矩阵乘法吧">来做一道矩阵乘法吧 <a href="#%e6%9d%a5%e5%81%9a%e4%b8%80%e9%81%93%e7%9f%a9%e9%98%b5%e4%b9%98%e6%b3%95%e5%90%a7" class="anchor" aria-hidden="true"><i class="material-icons align-middle">link</i></a></h4><p>假设有1道乘法计算：521 x 123 = ?，显然：
+$$521 = 5 \times 10^2 + 2 \times 10^1 + 1 \times 10^0$$
+$$123 = 1 \times 10^2 + 2 \times 10^1 + 3 \times 10^0$$</p>
+<p>设x=10，就得到了2个多项式：
+$f(x) = 5 x^2 + 2 x^1 + 1 x^0$
+$g(x) = 1 x^2 + 2 x^1 + 3 x^0$
+则：$h(x) = f(x)g(x) = a + bx^1 + c x^2 + d x^3 + e x^4$；
+即$521 \times 123 = abcde$</p>
+<p>$另取x = {1,2,3}$</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>$
+\begin{vmatrix}
+a &amp; b &amp; c &amp; d &amp; e \
+\end{vmatrix} \times
+$
+$
+\begin{vmatrix}
+1 &amp; 1 &amp; 1\\
+1^1 &amp; 2^1 &amp; 3^1\\
+1^2 &amp; 2^2 &amp; 3^2\\
+1^3 &amp; 2^3 &amp; 3^3\\
+1^4 &amp; 2^4 &amp; 3^4
+\end{vmatrix}=
+\begin{vmatrix}
+h(1) &amp; h(2) &amp; h(3) \
+\end{vmatrix}
+$</p>
+<ul>
+<li>
+<p>通过矩阵运算可得abcde结果（利用范德蒙德矩阵的相关性质）
+看上去很神奇，但很遗憾，时间复杂度依然是$O(n^2)$，没有优化。</p>
+<p>为了解决这个问题，让我们重温一下复数的知识。</p>
+</li>
+<li>
+<ul>
+<li>
+<h4 id="fft快速傅里叶变换">FFT（快速傅里叶变换） <a href="#fft%e5%bf%ab%e9%80%9f%e5%82%85%e9%87%8c%e5%8f%b6%e5%8f%98%e6%8d%a2" class="anchor" aria-hidden="true"><i class="material-icons align-middle">link</i></a></h4><p>不知道大家还记不记得高中数学学过的复数的几何表示：$r(cos(t)+i \times sin(t)$，复数的乘法可表示为模相乘，辐角相加。
+若取$r=1，t=\dfrac{2\pi}{n}$，设该复数为$x_n$，易知函数$L(k)=x_4^k$（k为非负整数）是个周期函数，最小正周期为n。
+当n=4，情况如下。
+
+
+
+
+
+
+  
+
+
+
+  
+    
+      <img src="/v2-b65e3054487befb773c247bc21991ad6_1440w_7291654835215369405.jpg" alt="" width="327" height="324" loading="lazy">
+    
+  
+
+可以发现 $x_4^0 = 1 = -x_4^2，x_4^1 = i = -x_4^3$。</p>
+<p>同理设$x_8$，易得$x_4^i=x_8^2i,-x_8^i=x_8^{i+4}，x_4^0=-x_8^4$
+
+
+
+
+
+
+  
+
+
+
+  
+    
+      <img src="/4ea5eb9cd9297cf6dcf591a550c4339d_16249551923350799412.png" alt="" width="429" height="415" loading="lazy">
+    
+  
+
+$$设f(x) = a_0 x^0 +a_1 x^1 + a_2 x^2 + a_3 x^3 + a_4 x^4 + a_5 x^5 + a_6 x^6 + a_7 x^7，(x取 x_8^0 …… x_8^7)$$
+$$设p1(x)=a_0 x^0+ a_2 x^1 + a_4 x^2+ a_6 x^3，p2(x)= a_1 x^0+a_3 x^1+a_5 x^2+ a_7 x^3$$
+则$f(x)=p1(x^2)+x·p2(x^2)$，$f(-x)=p1(x^2)-x·p2(x^2)$  （将多项式函数奇偶分离）
+所以$f(x_8^i)=p1(x_4^i)+x_4^i·p2(x_4^{i^2})$，$f(x_8^{4+i})=p1(x_4^i)-x_4^i·p2(x_4^{i^2})（i 取0，1，2，3）$
+成功实现用2个4项多项式表达8项多项式。而且，通过该等式，我们可以构造一种递归的算法，将每一个多项式分解为两项，而每一项又只需要$\dfrac{n}{2}$计算量，不断递归。时间复杂度为$O(nlogn)$</p>
+<p>另：因为多项式是2个2个地分解的，所以一般需要确保多项式项数说2的整次幂。不足的话就补充系数为零的项。</p>
+<p><strong>这种对f(x)进行的变换就叫做FFT。</strong></p>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>
+<h4 id="程序实现">程序实现 <a href="#%e7%a8%8b%e5%ba%8f%e5%ae%9e%e7%8e%b0" class="anchor" aria-hidden="true"><i class="material-icons align-middle">link</i></a></h4></li>
+</ul>
+</li>
+<li>
+<p>同样来源于CSDN，仅作参考。</p>
+</li>
+</ul>
+
+
+    
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;vector&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;cmath&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;complex&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> <span style="color:#66d9ef">namespace</span> std;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">double</span> PI <span style="color:#f92672">=</span> acos(<span style="color:#f92672">-</span><span style="color:#ae81ff">1.0</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 递归实现FFT
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">fft</span>(vector<span style="color:#f92672">&lt;</span>complex<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">double</span><span style="color:#f92672">&gt;&gt;&amp;</span> a, <span style="color:#66d9ef">bool</span> inv) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> n <span style="color:#f92672">=</span> a.size();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (n <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//分治
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    vector<span style="color:#f92672">&lt;</span>complex<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">double</span><span style="color:#f92672">&gt;&gt;</span> a0(n <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>), a1(n <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> n; i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">2</span>, j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        a0[j] <span style="color:#f92672">=</span> a[i];
+</span></span><span style="display:flex;"><span>        a1[j] <span style="color:#f92672">=</span> a[i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    fft(a0, inv);
+</span></span><span style="display:flex;"><span>    fft(a1, inv);
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//FFT
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">double</span> angle <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> PI <span style="color:#f92672">/</span> n <span style="color:#f92672">*</span> (inv <span style="color:#f92672">?</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span> <span style="color:#f92672">:</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>    complex<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">double</span><span style="color:#f92672">&gt;</span> w(<span style="color:#ae81ff">1</span>), wn(cos(angle), sin(angle));
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> n <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        a[i] <span style="color:#f92672">=</span> a0[i] <span style="color:#f92672">+</span> w <span style="color:#f92672">*</span> a1[i];
+</span></span><span style="display:flex;"><span>        a[i <span style="color:#f92672">+</span> n <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> a0[i] <span style="color:#f92672">-</span> w <span style="color:#f92672">*</span> a1[i];
+</span></span><span style="display:flex;"><span>        w <span style="color:#f92672">*=</span> wn;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// FFT乘法
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> multiply(vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> a, vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> b) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> n <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 将多项式的项数变为2的整数次幂
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">while</span> (n <span style="color:#f92672">&lt;</span> a.size() <span style="color:#f92672">+</span> b.size()) {
+</span></span><span style="display:flex;"><span>        n <span style="color:#f92672">*=</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    a.resize(n), b.resize(n);
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    vector<span style="color:#f92672">&lt;</span>complex<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">double</span><span style="color:#f92672">&gt;&gt;</span> c(n), d(n);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> n; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        c[i] <span style="color:#f92672">=</span> complex<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">double</span><span style="color:#f92672">&gt;</span>(a[i], <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>        d[i] <span style="color:#f92672">=</span> complex<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">double</span><span style="color:#f92672">&gt;</span>(b[i], <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 求原多项式的FFT
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    fft(c, false), fft(d, false);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> n; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        c[i] <span style="color:#f92672">*=</span> d[i];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 求乘法结果的IFFT
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    fft(c, true);
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 将IFFT中与逆矩阵相差的1/n乘进去
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> res(n);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> n; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        res[i] <span style="color:#f92672">=</span> (<span style="color:#66d9ef">int</span>)(c[i].real() <span style="color:#f92672">/</span> n <span style="color:#f92672">+</span> <span style="color:#ae81ff">0.5</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 处理进位
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int</span> carry <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i<span style="color:#f92672">&lt;</span> n; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    	res[i] <span style="color:#f92672">+=</span> carry;
+</span></span><span style="display:flex;"><span>    	carry <span style="color:#f92672">=</span> res[i] <span style="color:#f92672">/</span> <span style="color:#ae81ff">10</span>;
+</span></span><span style="display:flex;"><span>    	res[i] <span style="color:#f92672">%=</span> <span style="color:#ae81ff">10</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 去高位的0
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">while</span> (res.size() <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">&amp;&amp;</span> res.back() <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>    	res.pop_back();
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> res;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 将大整数字符串转换为vector&lt;int&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> to_vector(string s) {
+</span></span><span style="display:flex;"><span>	vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> res;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> s.size() <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>; i <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>; i<span style="color:#f92672">--</span>) {
+</span></span><span style="display:flex;"><span>		res.push_back(s[i] <span style="color:#f92672">-</span> <span style="color:#e6db74">&#39;0&#39;</span>);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> res;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 将vector&lt;int&gt;转换为大整数字符串
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>string <span style="color:#a6e22e">to_string</span>(vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> a) {
+</span></span><span style="display:flex;"><span>	string res;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> a.size() <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>; i <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>; i<span style="color:#f92672">--</span>) {
+</span></span><span style="display:flex;"><span>		res <span style="color:#f92672">+=</span> to_string(a[i]);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> res;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>	string s1, s2;
+</span></span><span style="display:flex;"><span>	cin <span style="color:#f92672">&gt;&gt;</span> s1 <span style="color:#f92672">&gt;&gt;</span> s2;
+</span></span><span style="display:flex;"><span>	vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> a <span style="color:#f92672">=</span> to_vector(s1), b <span style="color:#f92672">=</span> to_vector(s2);
+</span></span><span style="display:flex;"><span>	vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> c <span style="color:#f92672">=</span> multiply(a, b);
+</span></span><span style="display:flex;"><span>	cout <span style="color:#f92672">&lt;&lt;</span> to_string(c) <span style="color:#f92672">&lt;&lt;</span> endl;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
+
     </div>
 
+    
+
+    
                                             </div>
                                             <div><hr class="doc-hr">
 <div id="doc-nav" class="d-print-none">
+
+	<div class="row flex-xl-nowrap ">
+	<div class="col-sm-6 pt-2 doc-next">
+		<a href="/docs/example-page/">
+			<div class="card h-100 my-1">
+				<div class="card-body py-2">
+                    <p class="card-title fs-5 fw-semibold lh-base mb-0"><i class="material-icons align-middle">navigate_before</i> Example Page</p>
+					
+				</div>
+			</div>
+		</a>
+        </div>
+	<div class="col-sm-6 pt-2 doc-prev">
+		<a class="ms-auto" href="/docs/arp%E6%94%BB%E5%87%BB/">
+			<div class="card h-100 my-1 text-end">
+				<div class="card-body py-2">
+                    <p class="card-title fs-5 fw-semibold lh-base mb-0"> <i class="material-icons align-middle">navigate_next</i></p>
+					
+				</div>
+			</div>
+		</a>
+        </div>
+	</div>
 </div></div>
                                         </div>
                                     </div>
